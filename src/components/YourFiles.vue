@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="border-b border-gray-300 py-4">
-      <div class="flex justify-between w-2/3 m-auto">
+    <div class="border-b border-gray-300 py-4 px-5">
+      <div class="flex justify-between m-auto">
         <img :src="image" />
         <button class="flex items-center">
           <img :src="imgExit" class="w-5 mr-2" />
@@ -9,7 +9,7 @@
         </button>
       </div>
     </div>
-    <div class="m-auto w-2/3">
+    <div class="m-auto mx-5">
       <h2 class="text-left font-bold text-3xl">Ваши файлы</h2>
       <input
         type="file"
@@ -93,13 +93,35 @@
               <label v-bind:for="file.name"></label>
             </td>
             <td class="px-2">
-              {{ file.name }}
+              <div class="flex items-center">
+                <img
+                  :src="imgXls"
+                  v-if="file.name.split('.')[1] === 'xls'"
+                  class="mr-2"
+                />
+                <img
+                  :src="imgDocx"
+                  v-if="file.name.split('.')[1] === 'docx'"
+                  class="mr-2"
+                />
+                <img
+                  :src="imgPng"
+                  v-if="file.name.split('.')[1] === 'png'"
+                  class="mr-2"
+                />
+                <img
+                  :src="imgMp4"
+                  v-if="file.name.split('.')[1] === 'mp4'"
+                  class="mr-2"
+                />
+                <p>{{ file.name }}</p>
+              </div>
             </td>
             <td class="px-2">{{ formatDate(file.editedAt) }}</td>
             <td class="px-2">{{ formatSize(file.size) }}</td>
             <td class="h-10">
               <div class="my-2" v-if="upHere">
-                <button>
+                <button v-on:click="changeFile(file.name)">
                   <img :src="imgEdit" class="ml-2" width="30px" />
                 </button>
                 <button v-on:click="downloadFile(file.name)">
@@ -114,6 +136,12 @@
         </table>
       </div>
     </div>
+    <div
+      v-if="isMessage"
+      class="file__popUp absolute bottom-6 bg-black text-white text-left px-3 py-3"
+    >
+      {{ message }}
+    </div>
   </div>
 </template>
 
@@ -127,6 +155,10 @@ import imgDownload from "../img/download.svg";
 import imgDelete from "../img/delete.svg";
 import imgArrowUp from "../img/arrow-up.svg";
 import imgArrowDown from "../img/arrow-down.svg";
+import imgXls from "../img/xls.svg";
+import imgDocx from "../img/docx.svg";
+import imgPng from "../img/png.svg";
+import imgMp4 from "../img/mp4.svg";
 
 export default {
   name: "YourFiles",
@@ -136,6 +168,8 @@ export default {
       list: [],
       selectedFiles: [],
       file: "",
+      message: "",
+      isMessage: false,
       sortedByName: false,
       sortedByDate: false,
       sortedBySize: false,
@@ -146,6 +180,10 @@ export default {
       imgDelete,
       imgArrowUp,
       imgArrowDown,
+      imgXls,
+      imgDocx,
+      imgPng,
+      imgMp4,
       upHere: true,
     };
   },
@@ -157,7 +195,6 @@ export default {
           headers: { "auth-token": `Bearer ${JWTToken}` },
         })
         .then((res) => {
-          console.log("profile is:", res.data);
           this.list = res.data;
         })
         .catch((error) => console.log(error));
@@ -206,27 +243,60 @@ export default {
     },
     handleFileUpload() {
       this.file = this.$refs.file.files[0];
-      this.file.filename = this.$refs.file.files[0].name;
-      console.log(this.file);
       let formData = new FormData();
       formData.append("file", this.file);
       let JWTToken = localStorage.getItem("authToken");
       axios
-        .post("http://localhost:3000" + "/file", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            "auth-token": `Bearer ${JWTToken}`,
-          },
-        })
+        .post(
+          "http://localhost:3000" + `/file?filename=${this.file.name}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              "auth-token": `Bearer ${JWTToken}`,
+            },
+          }
+        )
         .then((res) => {
-          console.log(res);
           if (res.status === 200) {
-            // setTimeout(() => location.reload(), 2000);
+            setTimeout(() => this.fetchFiles(), 2000);
           }
         });
     },
+    changeFile: function (name) {
+      this.message = "Переименование файла " + name;
+      this.isMessage = true;
+      let JWTToken = localStorage.getItem("authToken");
+      axios
+        .put(
+          "http://localhost:3000" + "/file",
+          { name: "Новое название файла" + "." + name.split(".")[1] },
+          {
+            headers: {
+              "auth-token": `Bearer ${JWTToken}`,
+            },
+            params: {
+              filename: name,
+            },
+          }
+        )
+        .then((res) => {
+          if (res.status === 200) {
+            setTimeout(
+              () => (this.message = "Файл " + name + " успешно переиенован"),
+              2000
+            );
+          }
+        })
+        .catch(() => (this.message = "Не удалось скачать файл " + name))
+        .finally(() => {
+          setTimeout(() => this.fetchFiles(), 2000);
+          setTimeout(() => (this.isMessage = false), 5000);
+        });
+    },
     downloadFile: function (name) {
-      console.log(name);
+      this.message = "Скачивание файла " + name;
+      this.isMessage = true;
       let JWTToken = localStorage.getItem("authToken");
       axios
         .get("http://localhost:3000" + "/file", {
@@ -239,12 +309,18 @@ export default {
         })
         .then((res) => {
           if (res.status === 200) {
-            setTimeout(() => location.reload(), 2000);
+            setTimeout(
+              () => (this.message = "Файл " + name + " успешно скачан"),
+              2000
+            );
           }
         })
-        .catch((error) => console.log(error));
+        .catch(() => (this.message = "Не удалось скачать файл " + name))
+        .finally(() => setTimeout(() => (this.isMessage = false), 5000));
     },
     deleteFile: function (name) {
+      this.message = "Удаление файла " + name;
+      this.isMessage = true;
       let JWTToken = localStorage.getItem("authToken");
       axios
         .delete("http://localhost:3000" + "/file", {
@@ -257,10 +333,17 @@ export default {
         })
         .then((res) => {
           if (res.status === 200) {
-            setTimeout(() => location.reload(), 2000);
+            setTimeout(
+              () => (this.message = "Файл " + name + " успешно удален"),
+              2000
+            );
           }
         })
-        .catch((error) => console.log(error));
+        .catch(() => (this.message = "Не удалось скачать файл " + name))
+        .finally(() => {
+          setTimeout(() => this.fetchFiles(), 2000);
+          setTimeout(() => (this.isMessage = false), 5000);
+        });
     },
     downloadAll: function (event) {
       event.preventDefault();

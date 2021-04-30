@@ -79,15 +79,12 @@ export default {
           password: this.form.password,
         })
         .then((res) => {
-          console.log(res);
           if (res.status === 200) {
             localStorage.setItem("authToken", res.data);
             this.$router.push("/about");
           }
         })
         .catch((error) => {
-          console.log(error.response);
-          console.log(error.response.data);
           this.errors = error.response.data;
         });
     },
