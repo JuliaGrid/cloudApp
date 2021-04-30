@@ -80,7 +80,6 @@
             v-for="file in list"
             v-bind:key="file.id"
             class="text-left border-b border-gray-300"
-            @mouseover="upHere = true"
           >
             <td class="px-5">
               <input
