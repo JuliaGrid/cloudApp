@@ -9,7 +9,7 @@
         </button>
       </div>
     </div>
-    <div class="m-auto mx-5">
+    <div class="m-auto mx-5 mt-10 mb-5">
       <h2 class="text-left font-bold text-3xl">Ваши файлы</h2>
       <input
         type="file"
@@ -353,7 +353,7 @@ export default {
       this.selectedFiles.forEach((file) => this.deleteFile(file));
     },
     formatSize: function (size) {
-      const formattedSize = size / 1024;
+      const formattedSize = size / 1024 / 1024;
       return formattedSize.toFixed(1) + " МБ";
     },
     formatDate: function (date) {

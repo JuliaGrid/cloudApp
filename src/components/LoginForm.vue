@@ -3,7 +3,7 @@
     <div class="border-b border-gray-300 py-4">
       <img :src="image" class="m-auto" />
     </div>
-    <div class="relative top-1/2">
+    <div class="relative top-1/2 mt-10 mb-5">
       <h1 class="text-4xl font-bold">Облачное хранилище</h1>
       <p class="w-1/2 m-auto mt-9">
         Введите свою почту и пароль, чтобы начать работу в облачном хранилище
