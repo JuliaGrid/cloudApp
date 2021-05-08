@@ -40,7 +40,7 @@
 
         <button
           class="block bg-blue-600 text-white rounded py-3 px-8 m-auto mt-10"
-          v-on:click="signIn"
+          v-on:click="signIn(form)"
         >
           Войти
         </button>
@@ -51,43 +51,20 @@
 
 <script>
 import image from "../img/skillspace.svg";
-import axios from "axios";
+import { mapGetters, mapActions } from "vuex";
+
 export default {
   name: "LoginForm",
   data() {
     return {
-      mode: "signIn",
       form: {
         email: "",
         password: "",
       },
-      errors: [],
       image,
     };
   },
-  computed: {
-    isSignInForm() {
-      return this.mode === "signIn";
-    },
-  },
-  methods: {
-    signIn: function (event) {
-      event.preventDefault();
-      axios
-        .post("http://localhost:3000/login", {
-          login: this.form.email,
-          password: this.form.password,
-        })
-        .then((res) => {
-          if (res.status === 200) {
-            localStorage.setItem("authToken", res.data);
-            this.$router.push("/about");
-          }
-        })
-        .catch((error) => {
-          this.errors = error.response.data;
-        });
-    },
-  },
+  computed: mapGetters(["errors"]),
+  methods: mapActions(["signIn"]),
 };
 </script>

@@ -77,7 +77,7 @@
           </tr>
 
           <tr
-            v-for="file in list"
+            v-for="file in allFiles"
             v-bind:key="file.id"
             class="text-left border-b border-gray-300"
           >
@@ -139,14 +139,13 @@
       v-if="isMessage"
       class="file__popUp absolute bottom-6 bg-black text-white text-left px-3 py-3"
     >
-      {{ message }}
+      {{ message1 }}
     </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-
 import image from "../img/skillspace.svg";
 import imgExit from "../img/exit.svg";
 import imgEdit from "../img/edit.svg";
@@ -158,17 +157,16 @@ import imgXls from "../img/xls.svg";
 import imgDocx from "../img/docx.svg";
 import imgPng from "../img/png.svg";
 import imgMp4 from "../img/mp4.svg";
+import { mapGetters, mapActions } from "vuex";
+import { formatDate, formatSize } from "../utils/format";
 
 export default {
   name: "YourFiles",
   components: {},
   data() {
     return {
-      list: [],
       selectedFiles: [],
       file: "",
-      message: "",
-      isMessage: false,
       sortedByName: false,
       sortedByDate: false,
       sortedBySize: false,
@@ -184,24 +182,24 @@ export default {
       imgPng,
       imgMp4,
       upHere: true,
+      formatDate,
+      formatSize,
     };
   },
+  computed: mapGetters(["allFiles", "message", "isMessage"]),
   methods: {
-    fetchFiles: function () {
-      let JWTToken = localStorage.getItem("authToken");
-      axios
-        .get("http://localhost:3000" + "/list", {
-          headers: { "auth-token": `Bearer ${JWTToken}` },
-        })
-        .then((res) => {
-          this.list = res.data;
-        })
-        .catch((error) => console.log(error));
-    },
+    ...mapActions([
+      "fetchFiles",
+      "changeFile",
+      "uploadFile",
+      "deleteFile",
+      "downloadFile",
+      "logout",
+    ]),
     sortByName: function (event) {
       event.preventDefault();
       if (!this.sortedByName) {
-        this.list.sort(function (a, b) {
+        this.allFiles.sort(function (a, b) {
           const nameA = a.name.toLowerCase(),
             nameB = b.name.toLowerCase();
           if (nameA < nameB) return -1;
@@ -210,7 +208,7 @@ export default {
         });
         this.sortedByName = true;
       } else {
-        this.list.sort((a, b) => {
+        this.allFiles.sort((a, b) => {
           const nameA = a.name.toLowerCase(),
             nameB = b.name.toLowerCase();
           if (nameB < nameA) return -1;
@@ -223,126 +221,26 @@ export default {
     sortByDate: function (event) {
       event.preventDefault();
       if (!this.sortedByDate) {
-        this.list.sort((a, b) => a.editedAt - b.editedAt);
+        this.allFiles.sort((a, b) => a.editedAt - b.editedAt);
         this.sortedByDate = true;
       } else {
-        this.list.sort((a, b) => b.editedAt - a.editedAt);
+        this.allFiles.sort((a, b) => b.editedAt - a.editedAt);
         this.sortedByDate = false;
       }
     },
     sortBySize: function (event) {
       event.preventDefault();
       if (!this.sortedBySize) {
-        this.list.sort((a, b) => a.size - b.size);
+        this.allFiles.sort((a, b) => a.size - b.size);
         this.sortedBySize = true;
       } else {
-        this.list.sort((a, b) => b.size - a.size);
+        this.allFiles.sort((a, b) => b.size - a.size);
         this.sortedBySize = false;
       }
     },
     handleFileUpload() {
       this.file = this.$refs.file.files[0];
-      let formData = new FormData();
-      formData.append("file", this.file);
-      let JWTToken = localStorage.getItem("authToken");
-      axios
-        .post(
-          "http://localhost:3000" + `/file?filename=${this.file.name}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              "auth-token": `Bearer ${JWTToken}`,
-            },
-          }
-        )
-        .then((res) => {
-          if (res.status === 200) {
-            setTimeout(() => this.fetchFiles(), 2000);
-          }
-        });
-    },
-    changeFile: function (name) {
-      this.message = "Переименование файла " + name;
-      this.isMessage = true;
-      let JWTToken = localStorage.getItem("authToken");
-      axios
-        .put(
-          "http://localhost:3000" + "/file",
-          { name: "Новое название файла" + "." + name.split(".")[1] },
-          {
-            headers: {
-              "auth-token": `Bearer ${JWTToken}`,
-            },
-            params: {
-              filename: name,
-            },
-          }
-        )
-        .then((res) => {
-          if (res.status === 200) {
-            setTimeout(
-              () => (this.message = "Файл " + name + " успешно переиенован"),
-              2000
-            );
-          }
-        })
-        .catch(() => (this.message = "Не удалось скачать файл " + name))
-        .finally(() => {
-          setTimeout(() => this.fetchFiles(), 2000);
-          setTimeout(() => (this.isMessage = false), 5000);
-        });
-    },
-    downloadFile: function (name) {
-      this.message = "Скачивание файла " + name;
-      this.isMessage = true;
-      let JWTToken = localStorage.getItem("authToken");
-      axios
-        .get("http://localhost:3000" + "/file", {
-          headers: {
-            "auth-token": `Bearer ${JWTToken}`,
-          },
-          params: {
-            filename: name,
-          },
-        })
-        .then((res) => {
-          if (res.status === 200) {
-            setTimeout(
-              () => (this.message = "Файл " + name + " успешно скачан"),
-              2000
-            );
-          }
-        })
-        .catch(() => (this.message = "Не удалось скачать файл " + name))
-        .finally(() => setTimeout(() => (this.isMessage = false), 5000));
-    },
-    deleteFile: function (name) {
-      this.message = "Удаление файла " + name;
-      this.isMessage = true;
-      let JWTToken = localStorage.getItem("authToken");
-      axios
-        .delete("http://localhost:3000" + "/file", {
-          headers: {
-            "auth-token": `Bearer ${JWTToken}`,
-          },
-          params: {
-            filename: name,
-          },
-        })
-        .then((res) => {
-          if (res.status === 200) {
-            setTimeout(
-              () => (this.message = "Файл " + name + " успешно удален"),
-              2000
-            );
-          }
-        })
-        .catch(() => (this.message = "Не удалось скачать файл " + name))
-        .finally(() => {
-          setTimeout(() => this.fetchFiles(), 2000);
-          setTimeout(() => (this.isMessage = false), 5000);
-        });
+      this.uploadFile(this.file);
     },
     downloadAll: function (event) {
       event.preventDefault();
@@ -351,39 +249,6 @@ export default {
     deleteAll: function (event) {
       event.preventDefault();
       this.selectedFiles.forEach((file) => this.deleteFile(file));
-    },
-    formatSize: function (size) {
-      const formattedSize = size / 1024 / 1024;
-      return formattedSize.toFixed(1) + " МБ";
-    },
-    formatDate: function (date) {
-      const newDate = new Date(date);
-      const day =
-        newDate.getDate() < 10 ? "0" + newDate.getDate() : newDate.getDate();
-      const month =
-        newDate.getMonth() + 1 < 10
-          ? "0" + newDate.getMonth()
-          : newDate.getMonth();
-      const year = newDate.getFullYear();
-      const time = newDate.getHours() + ":" + newDate.getMinutes();
-      return day + "." + month + "." + year + ", " + time;
-    },
-    logout: function (event) {
-      event.preventDefault();
-      let JWTToken = localStorage.getItem("authToken");
-      axios
-        .post(
-          "http://localhost:3000" + "/logout",
-          {},
-          {
-            headers: { "auth-token": `Bearer ${JWTToken}` },
-          }
-        )
-        .then(() => {
-          localStorage.removeItem("authToken");
-          this.$router.replace("/");
-        })
-        .catch((error) => console.log(error));
     },
   },
   created() {
