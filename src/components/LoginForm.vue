@@ -39,7 +39,7 @@
         </p>
 
         <button
-          class="block bg-blue-600 text-white rounded py-3 px-8 m-auto mt-10"
+          class="block outline-none bg-blue-600 text-white rounded py-3 px-8 m-auto mt-10"
           v-on:click="signIn(form)"
         >
           Войти

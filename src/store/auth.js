@@ -1,4 +1,5 @@
 import axios from "axios";
+import router from "../router/index";
 
 export default {
   state: {
@@ -11,6 +12,7 @@ export default {
   },
   actions: {
     signIn: function(ctx, form) {
+      event.preventDefault();
       axios
         .post("http://localhost:3000/login", {
           login: form.email,
@@ -19,7 +21,8 @@ export default {
         .then((res) => {
           if (res.status === 200) {
             localStorage.setItem("authToken", res.data);
-            location.replace(window.location.origin + "/about");
+            console.log("log");
+            router.push("/about");
           }
         })
         .catch((error) => {
@@ -38,7 +41,7 @@ export default {
         )
         .then(() => {
           localStorage.removeItem("authToken");
-          location.replace(window.location.origin);
+          router.replace("/");
         })
         .catch((error) => console.log(error));
     },

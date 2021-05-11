@@ -3,7 +3,7 @@
     <div class="border-b border-gray-300 py-4 px-5">
       <div class="flex justify-between m-auto">
         <img :src="image" />
-        <button class="flex items-center">
+        <button class="focus:outline-none flex items-center">
           <img :src="imgExit" class="w-5 mr-2" />
           <span class="font-bold" v-on:click="logout">выйти</span>
         </button>
@@ -28,9 +28,9 @@
         <table class="mt-8 w-full">
           <tr class="text-left border-b border-gray-400">
             <th class="text-sm"></th>
-            <th class="text-sm px-2">
+            <th class="text-sm px-2 py-3">
               <button
-                class="flex items-center text-left font-bold"
+                class="focus:outline-none flex items-center text-left font-bold"
                 v-on:click="sortByName"
               >
                 Название
@@ -40,7 +40,7 @@
             </th>
             <th class="text-sm px-2">
               <button
-                class="flex items-center text-left font-bold"
+                class="focus:outline-none flex items-center text-left font-bold"
                 v-on:click="sortByDate"
               >
                 Дата изменения
@@ -50,7 +50,7 @@
             </th>
             <th class="text-sm px-2">
               <button
-                class="flex items-center text-left font-bold"
+                class="focus:outline-none flex items-center text-left font-bold"
                 v-on:click="sortBySize"
               >
                 Размер
@@ -65,13 +65,13 @@
             <td>
               <div class="flex" v-if="selectedFiles.length > 0">
                 <button
-                  class="block bg-blue-200 text-sm font-bold text-blue-600 rounded py-3 px-6 m-auto my-4"
+                  class="focus:outline-none block bg-blue-200 text-sm font-bold text-blue-600 rounded py-3 px-6 m-auto my-4"
                   v-on:click="downloadAll"
                 >
                   Скачать выбранные
                 </button>
                 <button
-                  class="block bg-blue-200 text-sm font-bold text-blue-600 rounded py-3 px-6 m-auto my-4"
+                  class="focus:outline-none block bg-blue-200 text-sm font-bold text-blue-600 rounded py-3 px-6 m-auto my-4"
                   v-on:click="deleteAll"
                 >
                   Удалить выбранные
@@ -83,7 +83,7 @@
           <tr
             v-for="file in allFiles"
             v-bind:key="file.id"
-            class="text-left border-b border-gray-300"
+            class="text-left border-b border-gray-300 hover:bg-gray-200"
           >
             <td class="px-5">
               <input
@@ -127,13 +127,22 @@
             <td class="px-2">{{ formatSize(file.size) }}</td>
             <td class="h-10">
               <div class="my-2" v-if="upHere">
-                <button v-on:click="changeFile(file.name)">
+                <button
+                  class="focus:outline-none"
+                  v-on:click="changeFile(file.name)"
+                >
                   <img :src="imgEdit" class="ml-2" width="30px" />
                 </button>
-                <button v-on:click="downloadFile(file.name)">
+                <button
+                  class="focus:outline-none"
+                  v-on:click="downloadFile(file.name)"
+                >
                   <img :src="imgDownload" class="ml-2" width="30px" />
                 </button>
-                <button v-on:click="deleteFile(file.name)">
+                <button
+                  class="focus:outline-none"
+                  v-on:click="deleteFile(file.name)"
+                >
                   <img :src="imgDelete" class="ml-2" width="30px" />
                 </button>
               </div>
