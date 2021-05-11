@@ -150,6 +150,12 @@ export default {
         })
         .then((res) => {
           if (res.status === 200) {
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = res.config.params.filename;
+            document.body.appendChild(a);
+            a.click();
             setTimeout(
               () =>
                 ctx.commit("updateMessage", "Файл " + name + " успешно скачан"),

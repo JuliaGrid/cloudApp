@@ -2,7 +2,6 @@ import axios from "axios";
 
 export default {
   state: {
-    authToken: "",
     errors: [],
   },
   mutations: {
@@ -12,8 +11,6 @@ export default {
   },
   actions: {
     signIn: function(ctx, form) {
-      console.log(form.email);
-      console.log(form.password);
       axios
         .post("http://localhost:3000/login", {
           login: form.email,

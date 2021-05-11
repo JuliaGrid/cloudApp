@@ -13,12 +13,16 @@
       <h2 class="text-left font-bold text-3xl">Ваши файлы</h2>
       <input
         type="file"
-        class="file__button flex mt-5"
+        class="w-120 flex mt-5 absolute z--1 opacity-0"
         id="file__button"
         ref="file"
         v-on:change="handleFileUpload"
       />
-      <label class="file__label" for="file__button">Добавить</label>
+      <label
+        class="block w-120 bg-blue-500 text-white py-2 rounded-md mt-4 text-sm"
+        for="file__button"
+        >Добавить</label
+      >
 
       <div>
         <table class="mt-8 w-full">
@@ -83,13 +87,16 @@
           >
             <td class="px-5">
               <input
-                class="checkbox"
+                class="checkbox absolute z--1 opacity-0"
                 type="checkbox"
                 v-bind:value="file.name"
                 v-bind:id="file.name"
                 v-model="selectedFiles"
               />
-              <label v-bind:for="file.name"></label>
+              <label
+                v-bind:for="file.name"
+                class="block border border-gray-300 rounded-sm w-30 h-30"
+              ></label>
             </td>
             <td class="px-2">
               <div class="flex items-center">
@@ -137,15 +144,14 @@
     </div>
     <div
       v-if="isMessage"
-      class="file__popUp absolute bottom-6 bg-black text-white text-left px-3 py-3"
+      class="absolute bottom-6 bg-black text-white text-left px-3 py-3 mx-10 w-10/12"
     >
-      {{ message1 }}
+      {{ message }}
     </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
 import image from "../img/skillspace.svg";
 import imgExit from "../img/exit.svg";
 import imgEdit from "../img/edit.svg";
